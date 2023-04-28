@@ -1,6 +1,7 @@
 package com.alibou.security.auth;
 
 import com.alibou.security.config.JwtService;
+import com.alibou.security.exceptions.BadRequestException;
 import com.alibou.security.token.Token;
 import com.alibou.security.token.TokenRepository;
 import com.alibou.security.token.TokenType;
@@ -21,6 +22,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +34,11 @@ public class AuthenticationService {
   private final AuthenticationManager authenticationManager;
 
   public AuthenticationResponse register(RegisterRequest request) {
+    Optional<User> byEmail = repository.findByEmail(request.getEmail());
+
+    if(byEmail.isPresent()){
+      throw new BadRequestException("User already registered");
+    }
     var user = User.builder()
         .firstname(request.getFirstname())
         .lastname(request.getLastname())
